@@ -300,7 +300,7 @@ function initDrillScreen() {
     const q = state.questions[state.currentIndex];
     
     // 連立方程式の LaTeX 表現 (A=B, C=D を大きな中括弧 { で美しく跨がせる)
-    const formulaLatex = `\\left\\{ \\\\begin{array}{l} ${q.eq1} \\\\\\\\ ${q.eq2} \\\\end{array} \\\\right.`;
+    const formulaLatex = `\\left\\{ \\begin{array}{l} ${q.eq1} \\\\ ${q.eq2} \\end{array} \\right.`;
     
     document.getElementById('question-formula').innerHTML = `\\(${formulaLatex}\\)`;
     
@@ -513,7 +513,7 @@ function checkAnswer() {
     
     // 記録用のオブジェクトを作成 (MathJax用に LaTeX 囲み、中括弧を大きく)
     const record = {
-        questionText: `\\left\\{ \\\\begin{array}{l} ${q.eq1} \\\\\\\\ ${q.eq2} \\\\end{array} \\\\right.`,
+        questionText: `\\left\\{ \\begin{array}{l} ${q.eq1} \\\\ ${q.eq2} \\end{array} \\right.`,
         userAnswer: `x = ${userValX}, \\ y = ${userValY}`,
         correctAnswer: `x = ${q.correctX}, \\ y = ${q.correctY}`,
         isCorrect: isCorrect
@@ -633,7 +633,7 @@ function showHint() {
         
         // 誤答レコードとして追加 (中括弧を大きく)
         const record = {
-            questionText: `\\left\\{ \\\\begin{array}{l} ${q.eq1} \\\\\\\\ ${q.eq2} \\\\end{array} \\\\right.`,
+            questionText: `\\left\\{ \\begin{array}{l} ${q.eq1} \\\\ ${q.eq2} \\end{array} \\right.`,
             userAnswer: 'ギブアップ（答えを確認）',
             correctAnswer: `x = ${q.correctX}, \\ y = ${q.correctY}`,
             isCorrect: false
