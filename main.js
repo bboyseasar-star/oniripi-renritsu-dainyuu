@@ -41,6 +41,13 @@ window.addEventListener('DOMContentLoaded', () => {
     
     // MathLive入力欄の初期化
     setupMathField();
+    
+    // 初回ロード時にページ全体の数式（スタート画面のコース説明など含む）をレンダリング
+    if (window.MathJax) {
+        MathJax.typesetPromise().catch(err => {
+            console.error('MathJax initial typesetting error:', err);
+        });
+    }
 });
 
 // ==================== ハイスコア管理 (localStorage try-catch & メモリフォールバック) ====================
@@ -292,8 +299,8 @@ function initDrillScreen() {
     // 問題文の表示 (連立方程式の中括弧フォーマット)
     const q = state.questions[state.currentIndex];
     
-    // 連立方程式の LaTeX 表現 (A=B, C=D を中括弧 { で束ねる)
-    const formulaLatex = `\\begin{cases} ${q.eq1} \\\\ ${q.eq2} \\end{cases}`;
+    // 連立方程式の LaTeX 表現 (A=B, C=D を大きな中括弧 { で美しく跨がせる)
+    const formulaLatex = `\\left\\{ \\\\begin{array}{l} ${q.eq1} \\\\\\\\ ${q.eq2} \\\\end{array} \\\\right.`;
     
     document.getElementById('question-formula').innerHTML = `\\(${formulaLatex}\\)`;
     
@@ -504,9 +511,9 @@ function checkAnswer() {
     
     feedbackArea.classList.add('active');
     
-    // 記録用のオブジェクトを作成 (MathJax用に LaTeX 囲み)
+    // 記録用のオブジェクトを作成 (MathJax用に LaTeX 囲み、中括弧を大きく)
     const record = {
-        questionText: `\\begin{cases} ${q.eq1} \\\\ ${q.eq2} \\end{cases}`,
+        questionText: `\\left\\{ \\\\begin{array}{l} ${q.eq1} \\\\\\\\ ${q.eq2} \\\\end{array} \\\\right.`,
         userAnswer: `x = ${userValX}, \\ y = ${userValY}`,
         correctAnswer: `x = ${q.correctX}, \\ y = ${q.correctY}`,
         isCorrect: isCorrect
@@ -518,16 +525,37 @@ function checkAnswer() {
         state.score++;
         document.getElementById('current-score').textContent = state.score;
         
-        feedbackBadge.textContent = '⭕ 正解！素晴らしい！';
+        // --- 演出多様性：日本語の正解フィードバックをランダムに設定して生徒を応援 ---
+        const correctMessages = [
+            '⭕ 正解！素晴らしい！',
+            '⭕ 正解！その調子！',
+            '⭕ お見事！天才的！',
+            '⭕ 正解！バッチリだね！',
+            '⭕ 正解！スピードものってるね！',
+            '⭕ YES！大正解！',
+            '⭕ さすが！カンペキ！',
+            '⭕ やったね！パーフェクト！'
+        ];
+        const randomMsg = correctMessages[Math.floor(Math.random() * correctMessages.length)];
+        feedbackBadge.textContent = randomMsg;
         feedbackBadge.className = 'feedback-badge correct';
         correctBlock.classList.remove('active'); // 解説は隠す
         
-        // ミニ紙吹雪演出（canvas-confetti）
+        // --- 演出多様性：紙吹雪カラーパレットをランダムに選択して演出の鮮やかさを演出 ---
         if (window.confetti) {
+            const palettes = [
+                ['#fe019a', '#01ffc3', '#01fe01', '#ff1493', '#00ffff'], // ネオンサイバー
+                ['#ffd700', '#c0c0c0', '#b8860b', '#eee8aa', '#f0e68c'], // ゴージャスゴールド
+                ['#ff4500', '#ff8c00', '#ffa500', '#adff2f', '#7fff00'], // ビタミンシトラス
+                ['#ffb3ba', '#baffc9', '#bae1ff', '#ffffba', '#ffdfba'], // パステルドリーム
+                ['#264653', '#2a9d8f', '#e9c46a', '#f4a261', '#e76f51']  // トロピカル
+            ];
+            const randomPalette = palettes[Math.floor(Math.random() * palettes.length)];
             confetti({
                 particleCount: 50,
                 spread: 60,
-                origin: { y: 0.7 }
+                origin: { y: 0.7 },
+                colors: randomPalette
             });
         }
     } else {
@@ -603,9 +631,9 @@ function showHint() {
         document.getElementById('btn-next').classList.remove('hidden');
         document.getElementById('btn-hint').classList.add('hidden');
         
-        // 誤答レコードとして追加
+        // 誤答レコードとして追加 (中括弧を大きく)
         const record = {
-            questionText: `\\begin{cases} ${q.eq1} \\\\ ${q.eq2} \\end{cases}`,
+            questionText: `\\left\\{ \\\\begin{array}{l} ${q.eq1} \\\\\\\\ ${q.eq2} \\\\end{array} \\\\right.`,
             userAnswer: 'ギブアップ（答えを確認）',
             correctAnswer: `x = ${q.correctX}, \\ y = ${q.correctY}`,
             isCorrect: false
@@ -658,7 +686,7 @@ function showResultScreen() {
     }
     loadPlayHistory();
     
-    // スコアに応じた演出とメッセージ
+    // スコアに応じた演出とメッセージのランダム化
     const emojiEl = document.getElementById('result-emoji');
     const titleEl = document.getElementById('result-title');
     const messageEl = document.getElementById('result-message');
@@ -667,22 +695,46 @@ function showResultScreen() {
     const accuracy = state.score / state.questions.length;
     
     if (accuracy === 1.0) {
-        emojiEl.textContent = '👑';
-        titleEl.textContent = 'パーフェクトクリア！';
-        messageEl.textContent = '素晴らしい！全問大正解！代入法は完璧にマスターしたね！';
+        // パーフェクト時のメッセージバリエーション
+        const perfectOptions = [
+            { emoji: '👑', title: 'パーフェクトクリア！', msg: '素晴らしい！全問大正解！代入法マスターの称号を授けよう！' },
+            { emoji: '🚀', title: '異次元のノーミス！', msg: 'すごい！一瞬で全問クリアしたね！この勢いで次の単元も突っ走ろう！' },
+            { emoji: '✨', title: '奇跡の全問正解！', msg: 'ノーミスクリア！代入法を完全に自分の力にした証拠だね！素晴らしい！' }
+        ];
+        const selected = perfectOptions[Math.floor(Math.random() * perfectOptions.length)];
+        emojiEl.textContent = selected.emoji;
+        titleEl.textContent = selected.title;
+        messageEl.textContent = selected.msg;
+        
         reviewBtn.classList.add('hidden'); // 間違えた問題がないので復習ボタンは隠す
         
-        // 豪華なコンフェッティ演出（両サイドから発射）
+        // 豪華なコンフェッティ演出（ランダムに3種類の演出スタイルから選択）
         triggerPerfectConfetti();
     } else if (accuracy >= 0.8) {
-        emojiEl.textContent = '🎉';
-        titleEl.textContent = '目標達成！クリア！';
-        messageEl.textContent = '合格ライン突破！よく頑張ったね！間違えた問題を復習して満点を目指そう！';
+        // 合格ライン突破時のメッセージバリエーション
+        const passOptions = [
+            { emoji: '🎉', title: '目標達成！クリア！', msg: '合格ライン突破！よく頑張ったね！間違えた問題を復習して満点を目指そう！' },
+            { emoji: '🌟', title: 'ナイスチャレンジ！合格！', msg: '素晴らしい出来栄え！あと一歩で満点だ！惜しかったところを復習しよう！' },
+            { emoji: '👍', title: '合格おめでとう！', msg: '合格基準クリア！しっかり代入法が理解できているね！素晴らしい！' }
+        ];
+        const selected = passOptions[Math.floor(Math.random() * passOptions.length)];
+        emojiEl.textContent = selected.emoji;
+        titleEl.textContent = selected.title;
+        messageEl.textContent = selected.msg;
+        
         reviewBtn.classList.remove('hidden');
     } else {
-        emojiEl.textContent = '🔥';
-        titleEl.textContent = 'お疲れさま！再挑戦しよう！';
-        messageEl.textContent = 'まずは間違えた問題を復習して、代入法を解くコツをつかもう！';
+        // 特訓ライン（復習）時のメッセージバリエーション
+        const failOptions = [
+            { emoji: '🔥', title: 'お疲れさま！再挑戦しよう！', msg: 'まずは間違えた問題を復習して、代入法を解くコツをつかもう！' },
+            { emoji: '💪', title: '次はできる！特訓モード！', msg: 'ここからが本当のレベルアップだ！間違えた問題を鬼リピしてマスターしよう！' },
+            { emoji: '🌱', title: '伸び代バツグン！', msg: '間違えた問題は宝物！じっくり復習して、解き方の流れを体に染み込ませよう！' }
+        ];
+        const selected = failOptions[Math.floor(Math.random() * failOptions.length)];
+        emojiEl.textContent = selected.emoji;
+        titleEl.textContent = selected.title;
+        messageEl.textContent = selected.msg;
+        
         reviewBtn.classList.remove('hidden');
     }
     
@@ -690,30 +742,87 @@ function showResultScreen() {
     buildReviewList();
 }
 
-// パーフェクト時の紙吹雪演出 (Web Audio API 等もあればさらに豪華ですが、Confettiで十分 wowed されます)
+// パーフェクト時の豪華多様化紙吹雪演出（生徒が毎回驚きを楽しめるようにランダムで演出スタイルを変えます）
 function triggerPerfectConfetti() {
     if (!window.confetti) return;
-    const duration = 2.5 * 1000;
-    const end = Date.now() + duration;
- 
-    (function frame() {
-        confetti({
-            particleCount: 3,
-            angle: 60,
-            spread: 55,
-            origin: { x: 0 }
-        });
-        confetti({
-            particleCount: 3,
-            angle: 120,
-            spread: 55,
-            origin: { x: 1 }
-        });
- 
-        if (Date.now() < end) {
-            requestAnimationFrame(frame);
+    
+    // カラーパレットの選択
+    const palettes = [
+        ['#fe019a', '#01ffc3', '#01fe01', '#ff1493', '#00ffff'], // ネオンサイバー
+        ['#ffd700', '#c0c0c0', '#b8860b', '#eee8aa', '#f0e68c'], // ゴージャスゴールド
+        ['#ff4500', '#ff8c00', '#ffa500', '#adff2f', '#7fff00'], // ビタミンシトラス
+        ['#ffb3ba', '#baffc9', '#bae1ff', '#ffffba', '#ffdfba'], // パステルドリーム
+        ['#ff007f', '#ff7f00', '#ffeb3b', '#4caf50', '#2196f3', '#9c27b0'] // レインボー
+    ];
+    const selectedPalette = palettes[Math.floor(Math.random() * palettes.length)];
+    
+    // 演出スタイルをランダムで決定 (0: シャワー, 1: 花火バースト, 2: レインフォール)
+    const style = Math.floor(Math.random() * 3);
+    
+    if (style === 0) {
+        // --- 演出スタイル1: 「ツイン・カラフル・シャワー」 (画面両端から豪華に交差して噴射) ---
+        const duration = 2.5 * 1000;
+        const end = Date.now() + duration;
+        
+        (function frame() {
+            confetti({
+                particleCount: 4,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0, y: 0.8 },
+                colors: selectedPalette
+            });
+            confetti({
+                particleCount: 4,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1, y: 0.8 },
+                colors: selectedPalette
+            });
+            
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        }());
+    } else if (style === 1) {
+        // --- 演出スタイル2: 「ファイヤーワークス・フェスティバル」 (大輪の紙吹雪がランダムに打ち上がる花火) ---
+        const count = 6;
+        for (let i = 0; i < count; i++) {
+            setTimeout(() => {
+                const randomX = 0.2 + Math.random() * 0.6; // 0.2〜0.8 のランダム横位置
+                const randomY = 0.2 + Math.random() * 0.4; // 0.2〜0.6 のランダム縦位置
+                confetti({
+                    particleCount: 70,
+                    spread: 80,
+                    origin: { x: randomX, y: randomY },
+                    colors: selectedPalette,
+                    ticks: 200,
+                    gravity: 1.1
+                });
+            }, i * 400); // 0.4秒間隔で順次打ち上げ
         }
-    }());
+    } else {
+        // --- 演出スタイル3: 「レイン・オブ・グローリー」 (画面上部からキラキラとゆっくり降り注ぐ) ---
+        const duration = 3.5 * 1000;
+        const end = Date.now() + duration;
+        
+        (function frame() {
+            confetti({
+                particleCount: 3,
+                angle: 270, // 下向きに降らせる
+                spread: 360,
+                startVelocity: 15,
+                origin: { x: Math.random(), y: -0.1 }, // 画面上部から
+                colors: selectedPalette,
+                gravity: 0.5, // ゆっくり降下
+                ticks: 300
+            });
+            
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        }());
+    }
 }
 
 // 振り返りリストのHTML作成
