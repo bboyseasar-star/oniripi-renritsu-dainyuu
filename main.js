@@ -299,10 +299,10 @@ function initDrillScreen() {
     // 問題文の表示 (連立方程式の中括弧フォーマット)
     const q = state.questions[state.currentIndex];
     
-    // 連立方程式の LaTeX 表現 (A=B, C=D を大きな中括弧 { で美しく跨がせる)
-    const formulaLatex = `\\left\\{ \\begin{array}{l} ${q.eq1} \\\\ ${q.eq2} \\end{array} \\right.`;
+    // 連立方程式の LaTeX 表現 (A=B, C=D を大きな中括弧 { で美しく跨がせる。displaystyleで巨大化を保証)
+    const formulaLatex = `\\displaystyle \\left\\{ \\begin{array}{l} ${q.eq1} \\\\ ${q.eq2} \\end{array} \\right.`;
     
-    document.getElementById('question-formula').innerHTML = `\\(${formulaLatex}\\)`;
+    document.getElementById('question-formula').innerHTML = `\\[${formulaLatex}\\]`;
     
     // MathJaxによる数式表示の更新
     if (window.MathJax) {
@@ -511,9 +511,9 @@ function checkAnswer() {
     
     feedbackArea.classList.add('active');
     
-    // 記録用のオブジェクトを作成 (MathJax用に LaTeX 囲み、中括弧を大きく)
+    // 記録用のオブジェクトを作成 (MathJax用に LaTeX 囲み、displaystyleで中括弧を巨大化)
     const record = {
-        questionText: `\\left\\{ \\begin{array}{l} ${q.eq1} \\\\ ${q.eq2} \\end{array} \\right.`,
+        questionText: `\\displaystyle \\left\\{ \\begin{array}{l} ${q.eq1} \\\\ ${q.eq2} \\end{array} \\right.`,
         userAnswer: `x = ${userValX}, \\ y = ${userValY}`,
         correctAnswer: `x = ${q.correctX}, \\ y = ${q.correctY}`,
         isCorrect: isCorrect
@@ -633,12 +633,41 @@ function showHint() {
         
         // 誤答レコードとして追加 (中括弧を大きく)
         const record = {
-            questionText: `\\left\\{ \\begin{array}{l} ${q.eq1} \\\\ ${q.eq2} \\end{array} \\right.`,
+            questionText: `\\displaystyle \\left\\{ \\begin{array}{l} ${q.eq1} \\\\ ${q.eq2} \\end{array} \\right.`,
             userAnswer: 'ギブアップ（答えを確認）',
             correctAnswer: `x = ${q.correctX}, \\ y = ${q.correctY}`,
             isCorrect: false
         };
         state.answers.push(record);
+        
+        // --- フィードバック画面と解説をその場で表示する処理を追加（生徒に間違い・ギブアップを視覚的に伝える） ---
+        const feedbackArea = document.getElementById('feedback-area');
+        const feedbackBadge = document.getElementById('feedback-badge');
+        const correctBlock = document.getElementById('correct-answer-block');
+        
+        feedbackArea.classList.add('active');
+        feedbackBadge.textContent = '❌ ギブアップ（答えを確認）';
+        feedbackBadge.className = 'feedback-badge wrong';
+        
+        // ユーザー解答と正しい答えの比較を表示 (MathJax)
+        document.getElementById('user-ans-val').innerHTML = `\\(なし（答えを確認）\\)`;
+        document.getElementById('correct-ans-val').innerHTML = `\\(x = ${q.correctX}, \\ y = ${q.correctY}\\)`;
+        
+        // 解説文章を設定
+        const expBox = document.getElementById('question-explanation');
+        expBox.innerHTML = q.explanation;
+        
+        correctBlock.classList.add('active'); // 解説エリアをアクティブに
+        
+        // 数式の再レンダリングを依頼
+        if (window.MathJax) {
+            MathJax.typesetPromise([
+                feedbackArea,
+                correctBlock
+            ]).catch(err => {
+                console.error('MathJax explanation rendering error at giveup:', err);
+            });
+        }
         
         if (!state.failedQuestions.some(item => item.id === q.id)) {
             state.failedQuestions.push(q);
@@ -846,7 +875,7 @@ function buildReviewList() {
                 <span class="review-item-status ${statusClass}">${statusText}</span>
             </div>
             <div class="review-item-body">
-                <div class="review-formula">\\(${ans.questionText}\\)</div>
+                <div class="review-formula">\\[${ans.questionText}\\]</div>
                 <div class="review-answers">
                     <div>あなたの答え: <span class="review-user-ans ${userAnsClass}">\\(${ans.userAnswer}\\)</span></div>
                     ${!ans.isCorrect ? `<div>正しい答え: <span class="review-correct-ans">\\(${ans.correctAnswer}\\)</span></div>` : ''}
