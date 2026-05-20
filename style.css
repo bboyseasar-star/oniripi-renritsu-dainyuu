@@ -1,0 +1,1008 @@
+/**
+ * 連立方程式・代入法ドリル「鬼リピ 〜連立方程式・代入法マスター〜」スタイルシート (style.css)
+ * 
+ * Chromebookの標準画面サイズ(1366x768)に最適化し、画面スクロールを完全に禁止しています。
+ * 目に優しい洗練されたダークブルーベースのデザインで、心地よい学習空間を構築します。
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Outfit:wght@400;600;800;900&display=swap');
+
+/* ==================== 変数と共通設定 ==================== */
+:root {
+  /* HSLによる調和のとれたカラーパレット */
+  --bg-gradient: linear-gradient(135deg, #0a0f1d 0%, #070a14 100%);
+  --card-bg: rgba(20, 26, 45, 0.65);
+  --card-border: rgba(99, 102, 241, 0.15);
+  --card-glow: rgba(99, 102, 241, 0.03);
+  
+  --primary: #6366f1;       /* インディゴブルー */
+  --primary-hover: #4f46e5;
+  --secondary: #475569;     /* スレートグレー */
+  --secondary-hover: #334155;
+  
+  --success: #10b981;       /* エメラルドグリーン（正解） */
+  --success-bg: rgba(16, 185, 129, 0.15);
+  --success-border: rgba(16, 185, 129, 0.3);
+  
+  --error: #f43f5e;         /* ローズレッド（不正解） */
+  --error-bg: rgba(244, 63, 94, 0.15);
+  --error-border: rgba(244, 63, 94, 0.3);
+  
+  --warning: #f59e0b;       /* アンバーゴールド（警告・ヒント） */
+  --warning-bg: rgba(245, 158, 11, 0.12);
+  --warning-border: rgba(245, 158, 11, 0.25);
+  
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  
+  --font-family: 'Outfit', 'BIZ UDPGothic', sans-serif;
+  --radius-lg: 16px;
+  --radius-md: 10px;
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* スクロールバーのカスタマイズ（美観を損ねないスリムなデザイン） */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.25);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.45);
+}
+
+/* ==================== リセット & 基本レイアウト ==================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background: var(--bg-gradient);
+  color: var(--text-main);
+  height: 100vh;
+  overflow: hidden; /* 画面全体のスクロールを完全に禁止 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* アプリ全体のコンテナ（Chromebookで1画面に美しく収まるアスペクト） */
+.app-container {
+  width: 100%;
+  max-width: 900px; /* 横幅はほどよく制限 */
+  height: 95vh;
+  max-height: 700px; /* 高さはChromebookの768pxから逆算し、上下マージンを取って700px制限 */
+  background: var(--card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 50px var(--card-glow);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==================== スクリーン切り替え ==================== */
+.screen {
+  display: none;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  animation: fadeIn 0.35s ease-out;
+}
+
+.screen.active {
+  display: flex;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==================== スタート画面 ==================== */
+#screen-start {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+}
+
+.title-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.badge {
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #a5b4fc;
+  padding: 4px 14px;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.app-title {
+  font-size: 3rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #4338ca 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 8px rgba(99, 102, 241, 0.3));
+}
+
+.app-subtitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+  opacity: 0.9;
+}
+
+.info-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  padding: 16px 24px;
+  width: 100%;
+  max-width: 650px;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 20px;
+  text-align: left;
+}
+
+.info-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.description {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+/* コース選択 UI */
+.courses-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+}
+
+.course-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid rgba(99, 102, 241, 0.2);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.course-card:hover {
+  background: rgba(99, 102, 241, 0.08);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(99, 102, 241, 0.15);
+}
+
+.course-card.completed::after {
+  content: '👑';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 1.2rem;
+}
+
+.course-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #a5b4fc;
+}
+
+.course-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.course-best {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #f59e0b;
+  margin-top: 4px;
+}
+
+.info-right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  padding-left: 20px;
+}
+
+/* 学習履歴スタイル */
+.history-box {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 100%;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.history-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #a5b4fc;
+}
+
+.btn-text-danger {
+  background: none;
+  border: none;
+  color: #fb7185;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: var(--transition);
+}
+
+.btn-text-danger:hover {
+  background: rgba(244, 63, 94, 0.1);
+}
+
+.history-list {
+  height: 100px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-right: 4px;
+}
+
+.history-list::-webkit-scrollbar {
+  width: 4px;
+}
+.history-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.history-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  padding: 4px 6px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+.history-item.pass {
+  border-left-color: #34d399;
+}
+
+.history-item.fail {
+  border-left-color: #fb7185;
+}
+
+.history-date {
+  color: var(--text-muted);
+  font-size: 0.65rem;
+}
+
+.history-score {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.history-score-val {
+  font-weight: 700;
+}
+
+.history-badge {
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+.history-badge.pass {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+.history-badge.fail {
+  background: rgba(244, 63, 94, 0.15);
+  color: #fb7185;
+}
+
+.history-empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  padding: 24px 0;
+}
+
+/* ==================== ドリル画面 ==================== */
+
+/* 1. ヘッダー部 */
+.drill-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.progress-container {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.progress-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.progress-number {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.progress-separator {
+  color: var(--text-muted);
+  margin: 0 2px;
+}
+
+.progress-number-total {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.progress-bar-bg {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 9999px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary) 0%, #818cf8 100%);
+  border-radius: 9999px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.score-badge {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  padding: 4px 12px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.score-number {
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+/* 2. 問題表示部 (連立方程式用に最適化) */
+.question-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  padding: 14px 20px;
+  margin-bottom: 12px;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.question-text {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+/* 問題式のMathJax表示調整 */
+.question-formula-container {
+  font-size: 1.3rem; /* 数式を読みやすく大きく表示 */
+  padding: 4px 12px;
+  background: rgba(99, 102, 241, 0.05);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  border-radius: 8px;
+}
+
+.question-prompt {
+  font-weight: 700;
+  color: #cbd5e1;
+  font-size: 0.95rem;
+}
+
+/* 3. 解答入力エリア (案A: xとyの2入力欄横並び) */
+.input-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.dual-input-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  max-width: 450px;
+}
+
+.dual-input-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.input-label {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #a5b4fc;
+  font-family: var(--font-family);
+  font-style: italic; /* x, y を数学らしく斜体に */
+}
+
+.math-field-container {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  padding: 2px 8px;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  min-width: 130px; /* 入力欄の崩れを防ぐ */
+}
+
+.math-field-container:focus-within {
+  border-color: var(--primary);
+  background: rgba(99, 102, 241, 0.05);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.2);
+}
+
+/* MathLive本体のスタイル調整 */
+math-field {
+  width: 100%;
+  font-size: 1.4rem;
+  background: transparent;
+  color: var(--text-main);
+  border: none;
+  outline: none;
+  padding: 4px 0;
+  --caret-color: var(--primary);
+  --selection-background-color: rgba(99, 102, 241, 0.3);
+}
+
+/* 不要なMathLive UI要素を非表示に */
+math-field::part(virtual-keyboard-toggle) {
+  display: none;
+}
+math-field::part(menu-toggle) {
+  display: none;
+}
+
+/* 注意書き */
+.input-note {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+/* 入力補助キーボード */
+.keyboard-helper {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  width: 100%;
+}
+
+.key-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  min-width: 44px;
+  text-align: center;
+  font-family: var(--font-family);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.key-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.key-btn:active {
+  transform: translateY(1px);
+}
+
+.key-btn.font-bold {
+  font-style: normal;
+  font-weight: 800;
+}
+
+.key-btn.btn-action {
+  font-style: normal;
+  font-size: 0.8rem;
+  background: rgba(244, 63, 94, 0.1);
+  border-color: rgba(244, 63, 94, 0.2);
+  color: #fda4af;
+  min-width: 64px;
+}
+
+.key-btn.btn-action:hover {
+  background: rgba(244, 63, 94, 0.2);
+  border-color: rgba(244, 63, 94, 0.3);
+}
+
+/* 4. アクション・判定部 */
+.action-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* ボタンを下部に吸着 */
+  min-height: 0;
+}
+
+/* 判定結果と解説スクロールエリア */
+.feedback-area {
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+  min-height: 0;
+}
+
+.feedback-area.active {
+  display: flex;
+}
+
+.feedback-badge {
+  font-size: 1.1rem;
+  font-weight: 900;
+  text-align: center;
+  padding: 5px 12px;
+  border-radius: var(--radius-md);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.feedback-badge.correct {
+  background: var(--success-bg);
+  border: 1px solid var(--success-border);
+  color: #34d399;
+}
+
+.feedback-badge.wrong {
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  color: #fb7185;
+}
+
+/* 誤答時比較ブロック */
+.correct-answer-block {
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.correct-answer-block.active {
+  display: flex;
+}
+
+.compare-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.compare-box {
+  background: rgba(244, 63, 94, 0.05);
+  border: 1px solid rgba(244, 63, 94, 0.15);
+  border-radius: var(--radius-md);
+  padding: 6px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.compare-box.correct {
+  background: rgba(16, 185, 129, 0.05);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.compare-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+.compare-val {
+  font-size: 1.15rem;
+  font-weight: 800;
+  display: flex;
+  gap: 14px;
+}
+
+/* 内部スクロールを許可する解説領域 */
+.explanation-box {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+  max-height: 130px; /* Chromebookで1画面に完璧に収める高さ */
+  overflow-y: auto;   /* 内部スクロール */
+}
+
+.exp-title {
+  font-weight: 700;
+  color: #818cf8;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.exp-step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 4px;
+}
+
+.exp-step {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  padding-bottom: 6px;
+}
+.exp-step:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.exp-formula {
+  font-size: 0.95rem;
+  text-align: center;
+  margin: 4px 0;
+  background: rgba(99, 102, 241, 0.08);
+  padding: 4px;
+  border-radius: 6px;
+}
+
+/* 内部スクロールを許可するヒント表示領域 */
+.hint-display-area {
+  display: none;
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #fde68a;
+  max-height: 80px; /* 1画面に収めるため低く制限 */
+  overflow-y: auto;  /* 内部スクロール */
+  margin-top: 8px;
+  animation: slideDown 0.25s ease-out;
+}
+
+.hint-display-area.active {
+  display: block;
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-4px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ヒント内の警告メッセージ */
+.hint-warning {
+  border-top: 1px dashed rgba(245, 158, 11, 0.4);
+  margin-top: 4px;
+  padding-top: 4px;
+  font-weight: 700;
+  color: #fb7185;
+}
+
+/* 下部操作ボタン行 (大判サイズ & 等幅) */
+.control-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.btn {
+  font-family: var(--font-family);
+  font-size: 1.05rem; /* 大きめのフォントサイズ（スキル準拠） */
+  font-weight: 700;
+  padding: 14px 18px; /* 大きめのパディング（スキル準拠） */
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 1; /* 等幅配分（スキル準拠） */
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-warning {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  color: #fde68a;
+}
+
+.btn-warning:hover {
+  background: rgba(245, 158, 11, 0.2);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ==================== 結果画面 ==================== */
+#screen-result {
+  align-items: center;
+  padding: 8px 0;
+  gap: 12px;
+}
+
+.result-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.result-emoji {
+  font-size: 2.5rem;
+  display: inline-block;
+  animation: bounce 1s infinite alternate;
+}
+
+@keyframes bounce {
+  from { transform: translateY(0); }
+  to { transform: translateY(-6px); }
+}
+
+.result-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.final-score-box {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-md);
+  padding: 6px 20px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.final-score-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.final-score-val {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #f59e0b;
+}
+
+.final-score-unit {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.result-message {
+  font-size: 0.85rem;
+  color: #a5b4fc;
+  font-weight: 700;
+}
+
+/* 振り返りスクロールリスト */
+.review-section {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.review-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.review-list {
+  flex: 1;
+  overflow-y: auto; /* ここでスクロールを可能にする */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 4px;
+}
+
+.review-item {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.review-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.review-item-num {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.review-item-status {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 9999px;
+}
+
+.review-item-status.correct {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+.review-item-status.wrong {
+  background: rgba(244, 63, 94, 0.15);
+  color: #fb7185;
+}
+
+.review-item-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  gap: 12px;
+}
+
+.review-formula {
+  flex: 1;
+  text-align: left;
+}
+
+.review-answers {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: right;
+  font-size: 0.8rem;
+}
+
+.review-user-ans {
+  color: #fb7185;
+}
+.review-item.correct .review-user-ans {
+  color: #34d399;
+}
+
+.review-correct-ans {
+  color: #34d399;
+  font-weight: 700;
+}
