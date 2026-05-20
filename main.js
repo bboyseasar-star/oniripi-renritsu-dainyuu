@@ -300,12 +300,16 @@ function initDrillScreen() {
     const q = state.questions[state.currentIndex];
     
     // 連立方程式の LaTeX 表現 (A=B, C=D を大きな中括弧 { で美しく跨がせる。displaystyleで巨大化を保証)
-    const formulaLatex = `\\displaystyle \\left\\{ \\begin{array}{l} ${q.eq1} \\\\ ${q.eq2} \\end{array} \\right.`;
+    const formulaLatex = `\\begin{cases} ${q.eq1} \\\\ ${q.eq2} \\end{cases}`;
     
     document.getElementById('question-formula').innerHTML = `\\[${formulaLatex}\\]`;
     
     // MathJaxによる数式表示の更新
     if (window.MathJax) {
+        MathJax.typesetClear([
+            document.getElementById('question-formula'),
+            document.querySelector('.keyboard-helper')
+        ]);
         // 問題数式、振り返り、ヒントなどのすべての数式要素を再描画
         MathJax.typesetPromise([
             document.getElementById('question-formula'),
@@ -513,7 +517,7 @@ function checkAnswer() {
     
     // 記録用のオブジェクトを作成 (MathJax用に LaTeX 囲み、displaystyleで中括弧を巨大化)
     const record = {
-        questionText: `\\displaystyle \\left\\{ \\begin{array}{l} ${q.eq1} \\\\ ${q.eq2} \\end{array} \\right.`,
+        questionText: `\\begin{cases} ${q.eq1} \\\\ ${q.eq2} \\end{cases}`,
         userAnswer: `x = ${userValX}, \\ y = ${userValY}`,
         correctAnswer: `x = ${q.correctX}, \\ y = ${q.correctY}`,
         isCorrect: isCorrect
@@ -575,6 +579,7 @@ function checkAnswer() {
         
         // 数式を美しく表示するため MathJax に再レンダリングを依頼
         if (window.MathJax) {
+            MathJax.typesetClear([document.getElementById('correct-answer-block')]);
             MathJax.typesetPromise([document.getElementById('correct-answer-block')]).catch(err => {
                 console.error('MathJax explanation rendering error:', err);
             });
@@ -610,14 +615,13 @@ function showHint() {
     }
     
     hintDisplay.innerHTML = currentHintHtml;
-    
-    // 数式の再レンダリング
+    // ヒントの数式をレンダリング
     if (window.MathJax) {
+        MathJax.typesetClear([hintDisplay]);
         MathJax.typesetPromise([hintDisplay]).catch(err => {
             console.error('MathJax hint rendering error:', err);
         });
-    }
-    
+    }  
     // スクロールを一番下に自動移動
     hintDisplay.scrollTop = hintDisplay.scrollHeight;
     
@@ -633,8 +637,8 @@ function showHint() {
         
         // 誤答レコードとして追加 (中括弧を大きく)
         const record = {
-            questionText: `\\displaystyle \\left\\{ \\begin{array}{l} ${q.eq1} \\\\ ${q.eq2} \\end{array} \\right.`,
-            userAnswer: 'ギブアップ（答えを確認）',
+            questionText: `\\begin{cases} ${q.eq1} \\\\ ${q.eq2} \\end{cases}`,
+            userAnswer: '\\text{ギブアップ（答えを確認）}',
             correctAnswer: `x = ${q.correctX}, \\ y = ${q.correctY}`,
             isCorrect: false
         };
@@ -650,7 +654,7 @@ function showHint() {
         feedbackBadge.className = 'feedback-badge wrong';
         
         // ユーザー解答と正しい答えの比較を表示 (MathJax)
-        document.getElementById('user-ans-val').innerHTML = `\\(なし（答えを確認）\\)`;
+        document.getElementById('user-ans-val').innerHTML = `\\(\\text{なし（答えを確認）}\\)`;
         document.getElementById('correct-ans-val').innerHTML = `\\(x = ${q.correctX}, \\ y = ${q.correctY}\\)`;
         
         // 解説文章を設定
@@ -661,6 +665,7 @@ function showHint() {
         
         // 数式の再レンダリングを依頼
         if (window.MathJax) {
+            MathJax.typesetClear([feedbackArea, correctBlock]);
             MathJax.typesetPromise([
                 feedbackArea,
                 correctBlock
@@ -887,6 +892,7 @@ function buildReviewList() {
     
     // 振り返りリスト内の数式のレンダリング
     if (window.MathJax) {
+        MathJax.typesetClear([listContainer]);
         MathJax.typesetPromise([listContainer]).catch(err => {
             console.error('MathJax review list rendering error:', err);
         });
