@@ -6,6 +6,22 @@
  * および間違えた問題の「無限復習ループ」を制御します。
  */
 
+// ==================== MathJax 描画ヘルパー ====================
+// MathJaxの読み込みを待機し、安全に数式を再レンダリングします
+function renderMath() {
+    if (window.MathJax && typeof MathJax.typesetPromise === 'function') {
+        try {
+            MathJax.typesetClear();
+            MathJax.typesetPromise().catch(err => console.error('MathJax rendering error:', err));
+        } catch (e) {
+            console.error('MathJax typeset exception:', e);
+        }
+    } else {
+        // MathJaxがロードされるまで待機して再実行
+        setTimeout(renderMath, 100);
+    }
+}
+
 // アプリのグローバル状態管理オブジェクト
 const state = {
     course: 'basic',       // 現在のコース ('basic' または 'advanced')
@@ -43,11 +59,7 @@ window.addEventListener('DOMContentLoaded', () => {
     setupMathField();
     
     // 初回ロード時にページ全体の数式（スタート画面のコース説明など含む）をレンダリング
-    if (window.MathJax) {
-        MathJax.typesetPromise().catch(err => {
-            console.error('MathJax initial typesetting error:', err);
-        });
-    }
+    renderMath();
 });
 
 // ==================== ハイスコア管理 (localStorage try-catch & メモリフォールバック) ====================
@@ -305,19 +317,7 @@ function initDrillScreen() {
     document.getElementById('question-formula').innerHTML = `\\[${formulaLatex}\\]`;
     
     // MathJaxによる数式表示の更新
-    if (window.MathJax) {
-        MathJax.typesetClear([
-            document.getElementById('question-formula'),
-            document.querySelector('.keyboard-helper')
-        ]);
-        // 問題数式、振り返り、ヒントなどのすべての数式要素を再描画
-        MathJax.typesetPromise([
-            document.getElementById('question-formula'),
-            document.querySelector('.keyboard-helper')
-        ]).catch(err => {
-            console.error('MathJax rendering error:', err);
-        });
-    }
+    renderMath();
     
     // xの入力欄にフォーカスを当てる
     setTimeout(() => {
@@ -578,12 +578,7 @@ function checkAnswer() {
         correctBlock.classList.add('active');
         
         // 数式を美しく表示するため MathJax に再レンダリングを依頼
-        if (window.MathJax) {
-            MathJax.typesetClear([document.getElementById('correct-answer-block')]);
-            MathJax.typesetPromise([document.getElementById('correct-answer-block')]).catch(err => {
-                console.error('MathJax explanation rendering error:', err);
-            });
-        }
+        renderMath();
         
         // 復習用に間違えた問題を記録 (重複防止)
         if (!state.failedQuestions.some(item => item.id === q.id)) {
@@ -616,12 +611,7 @@ function showHint() {
     
     hintDisplay.innerHTML = currentHintHtml;
     // ヒントの数式をレンダリング
-    if (window.MathJax) {
-        MathJax.typesetClear([hintDisplay]);
-        MathJax.typesetPromise([hintDisplay]).catch(err => {
-            console.error('MathJax hint rendering error:', err);
-        });
-    }  
+    renderMath();
     // スクロールを一番下に自動移動
     hintDisplay.scrollTop = hintDisplay.scrollHeight;
     
@@ -664,15 +654,7 @@ function showHint() {
         correctBlock.classList.add('active'); // 解説エリアをアクティブに
         
         // 数式の再レンダリングを依頼
-        if (window.MathJax) {
-            MathJax.typesetClear([feedbackArea, correctBlock]);
-            MathJax.typesetPromise([
-                feedbackArea,
-                correctBlock
-            ]).catch(err => {
-                console.error('MathJax explanation rendering error at giveup:', err);
-            });
-        }
+        renderMath();
         
         if (!state.failedQuestions.some(item => item.id === q.id)) {
             state.failedQuestions.push(q);
@@ -891,12 +873,7 @@ function buildReviewList() {
     });
     
     // 振り返りリスト内の数式のレンダリング
-    if (window.MathJax) {
-        MathJax.typesetClear([listContainer]);
-        MathJax.typesetPromise([listContainer]).catch(err => {
-            console.error('MathJax review list rendering error:', err);
-        });
-    }
+    renderMath();
 }
 
 // ==================== 復習モードの制御 ====================
