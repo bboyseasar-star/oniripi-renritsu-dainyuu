@@ -1006,3 +1006,9 @@ math-field::part(menu-toggle) {
   color: #34d399;
   font-weight: 700;
 }
+
+/* ==================== ユーティリティ ==================== */
+.hidden {
+  display: none !important;
+}
+
